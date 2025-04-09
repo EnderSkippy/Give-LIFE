@@ -4,6 +4,7 @@ var rows : Dictionary = {
 	"Chica":1,
 	"ChicaSpot":1,
 	"Float":1,
+	"Invert":1,
 	"Keystrokes":1,
 	"Keystroke Ramp":1,
 	"Lerp":1,
