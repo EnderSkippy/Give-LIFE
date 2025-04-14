@@ -1,0 +1,6 @@
+	Definite Bugs
+-Defaults recorded values to 1 when recording until a input is turn on then off again.
+-Loading a workspace causes nodes to load parts out of order.
+
+	Possible Bugs
+-Node outputs can be connected to their own inputs (I assume there may be some cases where it could be useful? idk)
