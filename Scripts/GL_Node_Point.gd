@@ -26,6 +26,8 @@ func _process(delta):
 					previewLine.default_color = Color.BLACK
 			TYPE_COLOR:
 				previewLine.default_color = output
+		if output is GL_AudioType:
+			previewLine.default_color = Color.BLUE_VIOLET
 		
 	var connections = mainNode.rows[valueName].get("connections",[])
 	if connections != []:
@@ -43,8 +45,11 @@ func _process(delta):
 						child.default_color = Color.BLACK
 				TYPE_COLOR:
 					child.default_color = output
+			if output is GL_AudioType:
+				child.default_color = Color.BLUE_VIOLET
 			child.points[0] = global_position + Vector2(size.x / 2, size.y / 2)
-			child.points[1] = (connections[iter]["target"] as GL_Node).give_input_point_pos(connections[iter]["input_name"])# - child.global_position
+			if typeof(connections[iter]["target"]) != TYPE_INT:
+				child.points[1] = (connections[iter]["target"] as GL_Node).give_input_point_pos(connections[iter]["input_name"])# - child.global_position
 			iter += 1
 
 func _create_line() -> Line2D:
@@ -81,6 +86,11 @@ func _start_drag():
 	dragging = true
 	lastToDrag = true
 	
+func _detatch():
+	for node in get_tree().get_nodes_in_group("Outputs"):
+			if node is GL_Node_Point:
+				node._node_disconnect(mainNode,valueName)
+	
 func mouse_enter():
 	mouseInside = true
 	
@@ -101,3 +111,6 @@ func _node_connect(node:GL_Node,inputValue:String):
 		return
 	mainNode._create_connection(node,inputValue,valueName)
 	update_lines()
+	
+func _node_disconnect(node: GL_Node, outputValue: String):
+	mainNode.destroy_connection(node,outputValue)

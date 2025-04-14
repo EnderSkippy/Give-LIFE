@@ -8,5 +8,7 @@ func _ready():
 
 func _process(delta):
 	super._process(delta)
-	rows["Output"]["output"] = rows["Output"]["pickValue"]
+	apply_pick_values()
+	for key in rows:
+		rows[key]["output"] = rows[key]["input"]
 	_send_input("Output")

@@ -1,0 +1,7 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://o4fe7jj6qk7v"]
+
+[ext_resource type="Shader" uid="uid://by0yjpxi1x4cs" path="res://addons/Godot-4-Color-Correction-and-Screen-Effects-main/Materials and Shaders/MyColors.tres" id="1_60gxd"]
+
+[resource]
+shader = ExtResource("1_60gxd")
+shader_parameter/ColorParameter = Color(0.005733, 0.015132, 0.051438, 1)

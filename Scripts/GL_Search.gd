@@ -1,14 +1,18 @@
 extends Control
 
 var rows : Dictionary = {
+	"Audio":1,
+	"Bool":1,
 	"Chica":1,
 	"ChicaSpot":1,
+	"Color":1,
 	"Float":1,
 	"Invert":1,
 	"Keystrokes":1,
 	"Keystroke Ramp":1,
 	"Lerp":1,
 	"Mix Colors":1,
+	"Mix Floats":1,
 	"Mouse Wheel":1,
 	"Random":1,
 	"Record":1,
@@ -52,9 +56,11 @@ func _set_rows():
 		container.call_deferred("add_child",row)
 
 func _create_node(name:String):
-	var node = load("res://Scenes/Node Types/" + name + ".tscn").instantiate()
-	get_parent().add_child(node)
+	var path = "res://Scenes/Node Types/" + name + ".tscn"
+	var node = load(path).instantiate()
+	get_parent().get_node("Holder").add_child(node)
 	node = (node as Control).get_child(0) as GL_Node
+	node.nodePath = path
 	node.position = lastMousePos
 	node._create_uuid()
 	

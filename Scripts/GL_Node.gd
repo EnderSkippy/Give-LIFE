@@ -1,7 +1,8 @@
 extends PanelContainer
 class_name GL_Node
 var rows : Dictionary
-var uuid : int #REMEMBER TO SET THIS ON CREATION
+var uuid : String
+var nodePath:String
 var dragging : bool
 var canDrag : bool
 var dragOffset : Vector2
@@ -10,10 +11,20 @@ var special_condition : String
 
 func _ready():
 	loadNodeRow = preload("res://Scenes/Nodes/Node Row.tscn")
+	(get_node("Margins").get_node("Holder").get_node("Title").get_node("Exit Button") as Button).connect("button_down",self.delete_whole_node)
 	
 func _process(delta):
 	if dragging:
 		position = get_viewport().get_mouse_position() + dragOffset
+	for key in rows:
+		for connection in rows[key].get("connections",[]):
+			if typeof(connection.target) == TYPE_STRING:
+				for node in get_tree().get_nodes_in_group("GL Node"):
+					if node is GL_Node:
+						if node.uuid == connection.target:
+							connection.target = node
+							break
+			
 		
 func _input(event): 
 	if event is InputEventMouseButton:
@@ -26,7 +37,7 @@ func _input(event):
 func _create_uuid():
 	var rand = RandomNumberGenerator.new()
 	rand.seed = Time.get_unix_time_from_system()
-	uuid = rand.randi()
+	uuid = str(rand.randi())
 
 func _update_visuals():
 	var holder = get_node("Margins").get_node("Holder")
@@ -61,6 +72,9 @@ func _update_visuals():
 				TYPE_BOOL:
 					assignPick(nodeRow.get_node("Pick Bool"),str(key))
 					(nodeRow.get_node("Pick Bool") as CheckButton).button_pressed = rows[key]["pickValue"]
+			if rows[key]["pickValue"] is GL_AudioType:
+				assignPick(nodeRow.get_node("Pick Audio"),str(key))
+				rows[key]["pickValue"] = GL_AudioType.new()
 		else:
 			(nodeRow.get_node("Label") as Label).size_flags_horizontal = Control.SIZE_EXPAND_FILL
 				
@@ -100,11 +114,18 @@ func _set_inout_type(label:Button, value):
 		TYPE_COLOR:
 			label.text = "▲"
 			label.add_theme_color_override("font_color", Color.WHITE_SMOKE)
-		_:
-			label.visible = false
+	if value is GL_AudioType:
+		label.text = "🔈"
+		label.add_theme_color_override("font_color", Color.BLUE_VIOLET)
+	if value == null:
+		label.visible = false
 
 func _set_title(name:String):
-	(get_node("Margins").get_node("Holder").get_node("Title") as Label).text = name
+	(get_node("Margins").get_node("Holder").get_node("Title").get_node("Title Label") as LineEdit).text = name
+
+func _get_title() -> String:
+	return (get_node("Margins").get_node("Holder").get_node("Title").get_node("Title Label") as LineEdit).text
+
 
 func _create_row(name:String,input,output,picker:bool,pickDefault,pickFloatMaximum:float):
 	if rows.has(name):
@@ -122,12 +143,12 @@ func _send_input(output_name: String):
 	if not rows.has(output_name):
 		return
 
-	var connections = rows[output_name].get("connections", [])
-	for conn in connections:
+	for conn in rows[output_name].get("connections", []):
 		var target = conn.get("target", null)
 		var input_name = conn.get("input_name", null)
 		if target and input_name:
-			target._recieve_input(input_name, rows[output_name]["output"])
+			if typeof(target) != TYPE_INT:
+				target._recieve_input(input_name, rows[output_name]["output"])
 
 func _confirm_backConnection(input_name:String):
 	if !rows.has(input_name):
@@ -141,9 +162,10 @@ func _create_connection(target:GL_Node,input_name:String,output_name:String):
 	var item = target.rows.get(input_name, null)
 	if item == null:
 		return
-		
-	if typeof(rows[output_name].get("output", null)) != typeof(target.rows[input_name].get("input",null)):
-		if !(typeof(rows[output_name].get("output", null)) == TYPE_BOOL && typeof(target.rows[input_name].get("input",null)) == TYPE_FLOAT):
+	
+	var typeA = typeof(rows[output_name].get("output", null))
+	var typeB = typeof(target.rows[input_name].get("input",null))
+	if (typeA != typeB) && !(typeA == TYPE_BOOL && typeB == TYPE_FLOAT) && !(typeA == TYPE_INT && typeB == TYPE_FLOAT)&& !(typeA == TYPE_FLOAT && typeB == TYPE_INT):
 			print("Type mismatch: cannot connect " + output_name + " to " + target.name)
 			return
 	
@@ -152,7 +174,7 @@ func _create_connection(target:GL_Node,input_name:String,output_name:String):
 		"input_name": input_name
 	}
 	
-	var connections = rows[output_name].get("connections",[])
+	var connections = 	rows[output_name].get("connections", [])
 	
 	for connection in connections:
 		if connection.target == thenew.target and connection.input_name == thenew.input_name:
@@ -191,3 +213,10 @@ func apply_pick_values():
 	for key in rows:
 		if rows[key]["picker"] == true && rows[key]["backConnected"] == false:
 			rows[key]["input"] = rows[key]["pickValue"]
+
+func delete_whole_node():
+	for node in get_tree().get_nodes_in_group("Outputs"):
+			if node is GL_Node_Point:
+				for key in rows:
+					node.mainNode.destroy_connection(self,key)
+	get_parent().queue_free()
