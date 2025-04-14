@@ -63,7 +63,7 @@ func _traverse():
 				if(rows[key]["output"] is float):
 					rows[key]["output"] = lerp(float(recording[key]["list"][recording[key]["lastUsed"]]["value"]),float(recording[key]["list"][recording[key]["current"]]["value"]),remap_time(time,recording[key]["list"][recording[key]["lastUsed"]]["time"],recording[key]["list"][recording[key]["current"]]["time"]))
 				elif(rows[key]["output"] is bool || rows[key]["output"] is GL_AudioType):
-					rows[key]["output"] = recording[key]["current"]
+					rows[key]["output"] = recording[key]["list"][recording[key]["current"]]["value"]
 				elif(rows[key]["output"] is Color):
 					rows[key]["output"] = lerp(recording[key]["list"][recording[key]["lastUsed"]]["value"],recording[key]["list"][recording[key]["current"]]["value"],remap_time(time,recording[key]["list"][recording[key]["lastUsed"]]["time"],recording[key]["list"][recording[key]["current"]]["time"]))
 
