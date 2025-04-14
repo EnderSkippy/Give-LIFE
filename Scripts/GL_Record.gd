@@ -60,7 +60,10 @@ func _traverse():
 				recording[key]["lastUsed"] = current
 				recording[key]["current"] = newCurrent 
 			if recording[key]["lastUsed"] != null && recording[key]["current"] != recording[key]["end"]:
-				rows[key]["output"] = lerp(recording[key]["list"][recording[key]["lastUsed"]]["value"],recording[key]["list"][recording[key]["current"]]["value"],remap_time(time,recording[key]["list"][recording[key]["lastUsed"]]["time"],recording[key]["list"][recording[key]["current"]]["time"]))
+					if typeof(recording[key]["list"][recording[key]["current"]]["value"]) != TYPE_BOOL:
+						rows[key]["output"] = lerp(recording[key]["list"][recording[key]["lastUsed"]]["value"],recording[key]["list"][recording[key]["current"]]["value"],remap_time(time,recording[key]["list"][recording[key]["lastUsed"]]["time"],recording[key]["list"][recording[key]["current"]]["time"]))
+					else:
+						rows[key]["output"] = recording[key]["list"][recording[key]["current"]]["value"]
 func remap_time(value: float, start: float, end: float) -> float:
 	if start == end:
 		return 0.0 
